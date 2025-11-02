@@ -1,39 +1,7 @@
-# Flask Framework
 flask==3.0.3
-Werkzeug==3.0.3
-
-# WSGI Server for Production
+werkzeug==3.0.3
 gunicorn==22.0.0
-
-# Machine Learning & Data Science
-scikit-learn==1.5.0
 pandas==2.2.2
+scikit-learn==1.4.2
 numpy==1.26.4
-
-# Model Serialization
-joblib==1.4.2
-
-# Additional ML Dependencies
-scipy==1.13.1
-threadpoolctl==3.5.0
-
-# Date/Time handling
-python-dateutil==2.9.0
-pytz==2024.1
-
-# For numerical computations
-six==1.16.0
-
-# Flask utilities
-itsdangerous==2.2.0
-Jinja2==3.1.4
-MarkupSafe==2.1.5
-click==8.1.7
-blinker==1.8.2
-
-# Plotting (if needed for future features)
-matplotlib==3.9.0
-seaborn==0.13.2
-
-# For packaging
-packaging==24.1
+joblib
