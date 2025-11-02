@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 100px 20px 50px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input {
+            padding: 12px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        select option {
+            background: #764ba2;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-subtitle {
+            color: white;
+            opacity: 0.9;
+            font-size: 18px;
+        }
+
+        .probability-bars {
+            margin-top: 20px;
+        }
+
+        .prob-item {
+            margin-bottom: 15px;
+        }
+
+        .prob-label {
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .prob-bar {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .prob-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 15px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .prob-fill.high-risk {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-text {
+            color: white;
+            opacity: 0.8;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-card {
+                padding: 30px 20px;
+            }
+
+            nav {
+                padding: 20px;
+            }
+
+            .page-header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">❤️ HeartAI</div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/predict_page">Prediction</a></li>
+            <li><a href="/about">About</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Heart Disease Risk Assessment</h1>
+            <p>Enter your health parameters to get an AI-powered prediction</p>
+        </div>
+
+        <div class="form-card">
+            <form id="predictionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <select id="age" name="age" required>
+                            <option value="">Select Age</option>
+                            {% for age in features.age %}
+                            <option value="{{ age }}">{{ age }} years</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sex">Sex</label>
+                        <select id="sex" name="sex" required>
+                            <option value="">Select Sex</option>
+                            {% for value, label in features.sex %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cp">Chest Pain Type</label>
+                        <select id="cp" name="cp" required>
+                            <option value="">Select Type</option>
+                            {% for value, label in features.cp %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trestbps">Resting BP (mm Hg)</label>
+                        <select id="trestbps" name="trestbps" required>
+                            <option value="">Select BP</option>
+                            {% for bp in features.trestbps %}
+                            <option value="{{ bp }}">{{ bp }} mm Hg</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chol">Cholesterol (mg/dl)</label>
+                        <select id="chol" name="chol" required>
+                            <option value="">Select Cholesterol</option>
+                            {% for chol in features.chol %}
+                            <option value="{{ chol }}">{{ chol }} mg/dl</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fbs">Fasting Blood Sugar</label>
+                        <select id="fbs" name="fbs" required>
+                            <option value="">Select FBS</option>
+                            {% for value, label in features.fbs %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="restecg">Resting ECG</label>
+                        <select id="restecg" name="restecg" required>
+                            <option value="">Select ECG Result</option>
+                            {% for value, label in features.restecg %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="thalach">Max Heart Rate</label>
+                        <select id="thalach" name="thalach" required>
+                            <option value="">Select Heart Rate</option>
+                            {% for hr in features.thalach %}
+                            <option value="{{ hr }}">{{ hr }} bpm</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exang">Exercise Induced Angina</label>
+                        <select id="exang" name="exang" required>
+                            <option value="">Select Option</option>
+                            {% for value, label in features.exang %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oldpeak">ST Depression</label>
+                        <select id="oldpeak" name="oldpeak" required>
+                            <option value="">Select Value</option>
+                            {% for val in features.oldpeak %}
+                            <option value="{{ val }}">{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="slope">Slope of ST Segment</label>
+                        <select id="slope" name="slope" required>
+                            <option value="">Select Slope</option>
+                            {% for value, label in features.slope %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ca">Number of Major Vessels</label>
+                        <select id="ca" name="ca" required>
+                            <option value="">Select Count</option>
+                            {% for value, label in features.ca %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="thal">Thalassemia</label>
+                        <select id="thal" name="thal" required>
+                            <option value="">Select Type</option>
+                            {% for value, label in features.thal %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Analyze Heart Health</button>
+            </form>
+
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <p>Analyzing your data...</p>
+            </div>
+
+            <div class="result-card" id="resultCard">
+                <div class="result-header">
+                    <div class="result-icon" id="resultIcon"></div>
+                    <div class="result-title" id="resultTitle"></div>
+                    <div class="result-subtitle" id="resultSubtitle"></div>
+                </div>
+
+                <div class="probability-bars">
+                    <div class="prob-item">
+                        <div class="prob-label">
+                            <span>No Disease Probability</span>
+                            <span id="noDiseasePct">0%</span>
+                        </div>
+                        <div class="prob-bar">
+                            <div class="prob-fill" id="noDiseaseBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="prob-item">
+                        <div class="prob-label">
+                            <span>Disease Probability</span>
+                            <span id="diseasePct">0%</span>
+                        </div>
+                        <div class="prob-bar">
+                            <div class="prob-fill high-risk" id="diseaseBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="info-text">
+                ℹ️ This prediction is for educational purposes only. Please consult a healthcare professional for medical advice.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const loader = document.getElementById('loader');
+            const resultCard = document.getElementById('resultCard');
+            const submitBtn = e.target.querySelector('.submit-btn');
+            
+            // Show loader
+            loader.style.display = 'block';
+            resultCard.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert('Error: ' + result.error);
+                    return;
+                }
+                
+                // Hide loader
+                loader.style.display = 'none';
+                resultCard.style.display = 'block';
+                
+                // Display results
+                const icon = document.getElementById('resultIcon');
+                const title = document.getElementById('resultTitle');
+                const subtitle = document.getElementById('resultSubtitle');
+                
+                if (result.prediction === 1) {
+                    icon.textContent = '⚠️';
+                    title.textContent = 'Heart Disease Detected';
+                    title.style.color = '#fca5a5';
+                    subtitle.textContent = result.risk_level;
+                } else {
+                    icon.textContent = '✅';
+                    title.textContent = 'No Heart Disease';
+                    title.style.color = '#86efac';
+                    subtitle.textContent = 'Your heart health looks good!';
+                }
+                
+                // Update probability bars
+                const noPct = (result.probability.no_disease * 100).toFixed(1);
+                const yesPct = (result.probability.disease * 100).toFixed(1);
+                
+                document.getElementById('noDiseasePct').textContent = noPct + '%';
+                document.getElementById('diseasePct').textContent = yesPct + '%';
+                
+                setTimeout(() => {
+                    document.getElementById('noDiseaseBar').style.width = noPct + '%';
+                    document.getElementById('diseaseBar').style.width = yesPct + '%';
+                }, 100);
+                
+                // Scroll to results
+                resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
